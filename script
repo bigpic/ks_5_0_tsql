@@ -1,8 +1,23 @@
+-- Create SQL Login
+CREATE LOGIN zavhorodnii WITH PASSWORD = '.........';
+GO
+
+-- For login create a user in the database
+CREATE USER zavhorodnii FOR LOGIN zavhorodnii
+ WITH DEFAULT_SCHEMA = zschema;  
+GO
+
+-- Add user to the database owner role
+EXEC sp_addrolemember 'db_owner', 'zavhorodnii';
+
+-- Create Schema
+CREATE SCHEMA zschema AUTHORIZATION zavhorodnii
+
 -- Create a database scoped credential with Azure storage account key as the secret.
 CREATE DATABASE SCOPED CREDENTIAL AzureStorCredential
 WITH
   IDENTITY = 'stor00001',
-  SECRET = 't1PXwVl+vGz4hb0Q9wTWDUk3k2xJackRApdQBht4+2hIGlYXEiyyJjZ0iNqtD5AeK5+d/U8XP2sw1Rq7pGIrBA==' ;
+  SECRET = 't1PXwVl+vGz4hb0Q9wTW...........jZ0iNqtD5AeK5+d/U8XP2sw1Rq7pGIrBA==' ;
 
 -- Create an external data source with CREDENTIAL option.
 CREATE EXTERNAL DATA SOURCE zblobsource
