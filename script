@@ -17,7 +17,7 @@ CREATE SCHEMA zschema AUTHORIZATION zavhorodnii
 CREATE DATABASE SCOPED CREDENTIAL AzureStorCredential
 WITH
   IDENTITY = 'stor00001',
-  SECRET = 't1PXwVl+vGz4hb0Q9wTW...........jZ0iNqtD5AeK5+d/U8XP2sw1Rq7pGIrBA==' ;
+  SECRET = 't1PXwV.......................................Rq7pGIrBA==' ;
 
 -- Create an external data source with CREDENTIAL option.
 CREATE EXTERNAL DATA SOURCE zblobsource
