@@ -1,0 +1,90 @@
+-- Create a database scoped credential with Azure storage account key as the secret.
+CREATE DATABASE SCOPED CREDENTIAL AzureStorCredential
+WITH
+  IDENTITY = 'stor00001',
+  SECRET = 't1PXwVl+vGz4hb0Q9wTWDUk3k2xJackRApdQBht4+2hIGlYXEiyyJjZ0iNqtD5AeK5+d/U8XP2sw1Rq7pGIrBA==' ;
+
+-- Create an external data source with CREDENTIAL option.
+CREATE EXTERNAL DATA SOURCE zblobsource
+WITH
+  ( LOCATION = 'wasbs://zblob@stor00001.blob.core.windows.net/' ,
+    CREDENTIAL = AzureStorCredential ,
+    TYPE = HADOOP
+  ) ;
+
+-- Create an external file format for DELIMITED (CSV/TSV) files.  
+CREATE EXTERNAL FILE FORMAT zfileformat  
+WITH ( 
+        FORMAT_TYPE = DELIMITEDTEXT 
+		    , FORMAT_OPTIONS (
+             FIELD_TERMINATOR = ',',
+			 FIRST_ROW = 2
+              )
+   )
+
+CREATE EXTERNAL TABLE zschema.zexttab
+    ( 
+	VendorID int NULL ,
+	tpep_pickup_datetime datetime not null,
+	tpep_dropoff_datetime datetime not null,
+	passenger_count int null,
+	trip_distance float null,
+	RateCodeID varchar(200) null,
+	store_and_fwd_flag char(1) null,
+	PULocationID int  null,
+	DOLocationID int null,
+	payment_type int null,
+	fare_amount float null,
+	extra float null,
+	mta_tax float null,
+	tip_amount float null,
+	tolls_amount float null,
+	improvement_surcharge float null,
+	total_amount float null,
+	congestion_surcharge float null
+	)  
+    WITH (
+        LOCATION = 'yellow_tripdata_2020-01.csv',  
+        DATA_SOURCE = zblobsource,  
+        FILE_FORMAT = zfileformat  
+           )  
+GO
+
+
+CREATE TABLE zschema.fact_tripdata
+WITH (DISTRIBUTION = HASH(tpep_pickup_datetime ) )
+AS SELECT * FROM
+zschema.zexttab ;
+
+
+CREATE TABLE  zschema.Payment_type
+(ID int not null,
+Name varchar(255) null ) 
+WITH  
+  (   
+    DISTRIBUTION = REPLICATE ,
+	CLUSTERED INDEX (ID) 
+  );  
+INSERT INTO zschema.Payment_type VALUES (1, 'Credit card');
+INSERT INTO zschema.Payment_type VALUES (2, 'Cash');
+INSERT INTO zschema.Payment_type VALUES (3, 'No charge');
+INSERT INTO zschema.Payment_type VALUES (4, 'Dispute');
+INSERT INTO zschema.Payment_type VALUES (5, 'Unknown');
+INSERT INTO zschema.Payment_type VALUES (6, 'Voided trip');
+
+
+
+CREATE TABLE  zschema.RateCode
+(ID int not null,
+Name varchar(255) null ) 
+WITH  
+  (   
+    DISTRIBUTION = REPLICATE ,
+	CLUSTERED INDEX (ID) 
+  );  
+INSERT INTO zschema.RateCode VALUES (1, 'Standard rate');
+INSERT INTO zschema.RateCode VALUES (2, 'JFK');
+INSERT INTO zschema.RateCode VALUES (3, 'Newark');
+INSERT INTO zschema.RateCode VALUES (4, 'Nassau or Westchester');
+INSERT INTO zschema.RateCode VALUES (5, 'Negotiated fare');
+INSERT INTO zschema.RateCode VALUES (6, 'Group ride');
