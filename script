@@ -71,6 +71,17 @@ WITH (DISTRIBUTION = HASH(tpep_pickup_datetime ) )
 AS SELECT * FROM
 zschema.zexttab ;
 
+CREATE TABLE  zschema.Vendor
+(ID int not null,
+Name varchar(255) null ) 
+WITH  
+  (   
+    DISTRIBUTION = REPLICATE ,
+	CLUSTERED INDEX (ID) 
+  );  
+INSERT INTO zschema.Vendor VALUES (1, 'Creative Mobile Technologies, LLC');
+INSERT INTO zschema.Vendor VALUES (2, 'VeriFone Inc.');
+
 
 CREATE TABLE  zschema.Payment_type
 (ID int not null,
